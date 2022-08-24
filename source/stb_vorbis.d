@@ -58,7 +58,8 @@ module stb_vorbis;
 // stolen by adam and module renamed.
 // Stolen by jordan4ibanez and further modified.
 /++
-	Port of stb_vorbis to D. Provides .ogg audio file reading capabilities. See [arsd.simpleaudio] for code that can use this to actually load and play the file.
+	Port of stb_vorbis to D. Provides .ogg audio file reading capabilities.
+    See [arsd.simpleaudio] for code that can use this to actually load and play the file.
 +/
 
 import core.stdc.stdio : FILE;
@@ -448,7 +449,10 @@ version(STB_VORBIS_FAST_HUFFMAN_INT) {} else version = STB_VORBIS_FAST_HUFFMAN_S
 //     trade off storage for speed.
 //version = STB_VORBIS_DIVIDES_IN_CODEBOOK;
 
-version(STB_VORBIS_CODEBOOK_SHORTS) static assert(0, "STB_VORBIS_CODEBOOK_SHORTS is no longer supported as it produced incorrect results for some input formats");
+version(STB_VORBIS_CODEBOOK_SHORTS) static assert(
+    0,
+    "STB_VORBIS_CODEBOOK_SHORTS is no longer supported as it produced incorrect results for some input formats"
+);
 
 // STB_VORBIS_DIVIDE_TABLE
 //     this replaces small integer divides in the floor decode loop with
@@ -587,7 +591,7 @@ struct ProbedPage {
   uint last_decoded_sample;
 }
 
-private int error (VorbisDecoder f, STBVorbisError e) {
+int error (VorbisDecoder f, STBVorbisError e) {
   f.error = e;
   if (!f.eof && e != STBVorbisError.need_more_data) {
     f.error = e; // breakpoint for debugging
@@ -644,7 +648,7 @@ T** temp_block_array(T) (VorbisDecoder f, uint count, uint size) {
 */
 
 // given a sufficiently large block of memory, make an array of pointers to subblocks of it
-private void* make_block_array (void* mem, int count, int size) {
+void* make_block_array (void* mem, int count, int size) {
   void** p = cast(void**)mem;
   char* q = cast(char*)(p+count);
   foreach (immutable i; 0..count) {
@@ -654,7 +658,7 @@ private void* make_block_array (void* mem, int count, int size) {
   return p;
 }
 
-private T* setup_malloc(T) (VorbisDecoder f, uint sz) {
+T* setup_malloc(T) (VorbisDecoder f, uint sz) {
   sz *= T.sizeof;
   /*
   f.setup_memory_required += sz;
@@ -673,12 +677,12 @@ private T* setup_malloc(T) (VorbisDecoder f, uint sz) {
   return cast(T*)res;
 }
 
-private void setup_free (VorbisDecoder f, void* p) {
+void setup_free (VorbisDecoder f, void* p) {
   //if (f.alloc.alloc_buffer) return; // do nothing; setup mem is a stack
   if (p !is null) f.alloc.free(p, f);
 }
 
-private void* setup_temp_malloc (VorbisDecoder f, uint sz) {
+void* setup_temp_malloc (VorbisDecoder f, uint sz) {
   auto res = f.alloc.allocTemp(sz+8, f); // +8 to compensate dmd codegen bug: it can read dword(qword?) when told to read only byte
   if (res !is null) {
     import core.stdc.string : memset;
@@ -687,7 +691,7 @@ private void* setup_temp_malloc (VorbisDecoder f, uint sz) {
   return res;
 }
 
-private void setup_temp_free (VorbisDecoder f, void* p, uint sz) {
+void setup_temp_free (VorbisDecoder f, void* p, uint sz) {
   if (p !is null) f.alloc.freeTemp(p, (sz ? sz : 1)+8, f); // +8 to compensate dmd codegen bug: it can read dword(qword?) when told to read only byte
 }
 
@@ -708,7 +712,7 @@ uint crc32_update (uint crc, ubyte b) {
 }
 
 // used in setup, and for huffman that doesn't go fast path
-private uint bit_reverse (uint n) {
+uint bit_reverse (uint n) {
   static if (__VERSION__ > 2067) pragma(inline, true);
   n = ((n&0xAAAAAAAA)>>1)|((n&0x55555555)<<1);
   n = ((n&0xCCCCCCCC)>>2)|((n&0x33333333)<<2);
@@ -717,7 +721,7 @@ private uint bit_reverse (uint n) {
   return (n>>16)|(n<<16);
 }
 
-private float square (float x) {
+float square (float x) {
   static if (__VERSION__ > 2067) pragma(inline, true);
   return x*x;
 }
@@ -750,7 +754,7 @@ enum NO_CODE = 255;
 /////////////////////// LEAF SETUP FUNCTIONS //////////////////////////
 //
 // these functions are only called at setup, and only a few times per file
-private float float32_unpack (uint x) {
+float float32_unpack (uint x) {
   import core.math : ldexp;
   //static if (__VERSION__ > 2067) pragma(inline, true);
   // from the specification
@@ -768,7 +772,7 @@ private float float32_unpack (uint x) {
 // vorbis allows a huffman table with non-sorted lengths. This
 // requires a more sophisticated construction, since symbols in
 // order do not map to huffman codes "in order".
-private void add_entry (Codebook* c, uint huff_code, int symbol, int count, ubyte len, uint* values) {
+void add_entry (Codebook* c, uint huff_code, int symbol, int count, ubyte len, uint* values) {
   if (!c.sparse) {
     c.codewords[symbol] = huff_code;
   } else {
@@ -778,7 +782,7 @@ private void add_entry (Codebook* c, uint huff_code, int symbol, int count, ubyt
   }
 }
 
-private int compute_codewords (Codebook* c, ubyte* len, int n, uint* values) {
+int compute_codewords (Codebook* c, ubyte* len, int n, uint* values) {
   import core.stdc.string : memset;
 
   int i, k, m = 0;
@@ -832,7 +836,7 @@ private int compute_codewords (Codebook* c, ubyte* len, int n, uint* values) {
 
 // accelerated huffman table allows fast O(1) match of all symbols
 // of length <= STB_VORBIS_FAST_HUFFMAN_LENGTH
-private void compute_accelerated_huffman (Codebook* c) {
+void compute_accelerated_huffman (Codebook* c) {
   //for (i=0; i < FAST_HUFFMAN_TABLE_SIZE; ++i) c.fast_huffman.ptr[i] = -1;
   c.fast_huffman.ptr[0..FAST_HUFFMAN_TABLE_SIZE] = -1;
   auto len = (c.sparse ? c.sorted_entries : c.entries);
@@ -857,7 +861,7 @@ extern(C) int uint32_compare (const void* p, const void* q) {
   return (x < y ? -1 : x > y);
 }
 
-private int include_in_sort (Codebook* c, uint len) {
+int include_in_sort (Codebook* c, uint len) {
   if (c.sparse) { assert(len != NO_CODE); return true; }
   if (len == NO_CODE) return false;
   if (len > STB_VORBIS_FAST_HUFFMAN_LENGTH) return true;
@@ -866,7 +870,7 @@ private int include_in_sort (Codebook* c, uint len) {
 
 // if the fast table above doesn't work, we want to binary
 // search them... need to reverse the bits
-private void compute_sorted_huffman (Codebook* c, ubyte* lengths, uint* values) {
+void compute_sorted_huffman (Codebook* c, ubyte* lengths, uint* values) {
   // build a list of all the entries
   // OPTIMIZATION: don't include the short ones, since they'll be caught by FAST_HUFFMAN.
   // this is kind of a frivolous optimization--I don't see any performance improvement,
@@ -915,7 +919,7 @@ private void compute_sorted_huffman (Codebook* c, ubyte* lengths, uint* values) 
 }
 
 // only run while parsing the header (3 times)
-private int vorbis_validate (const(void)* data) {
+int vorbis_validate (const(void)* data) {
   static if (__VERSION__ > 2067) pragma(inline, true);
   immutable char[6] vorbis = "vorbis";
   return ((cast(char*)data)[0..6] == vorbis[]);
@@ -923,7 +927,7 @@ private int vorbis_validate (const(void)* data) {
 
 // called from setup only, once per code book
 // (formula implied by specification)
-private int lookup1_values (int entries, int dim) {
+int lookup1_values (int entries, int dim) {
   import core.stdc.math : lrintf;
   import std.math : floor, exp, pow, log;
   int r = cast(int)lrintf(floor(exp(cast(float)log(cast(float)entries)/dim)));
@@ -934,7 +938,7 @@ private int lookup1_values (int entries, int dim) {
 }
 
 // called twice per file
-private void compute_twiddle_factors (int n, float* A, float* B, float* C) {
+void compute_twiddle_factors (int n, float* A, float* B, float* C) {
   import std.math : cos, sin, PI;
   int n4 = n>>2, n8 = n>>3;
   int k, k2;
@@ -950,19 +954,19 @@ private void compute_twiddle_factors (int n, float* A, float* B, float* C) {
   }
 }
 
-private void compute_window (int n, float* window) {
+void compute_window (int n, float* window) {
   import std.math : sin, PI;
   int n2 = n>>1;
   foreach (int i; 0..n2) *window++ = cast(float)sin(0.5*PI*square(cast(float)sin((i-0+0.5)/n2*0.5*PI)));
 }
 
-private void compute_bitreverse (int n, ushort* rev) {
+void compute_bitreverse (int n, ushort* rev) {
   int ld = ilog(n)-1; // ilog is off-by-one from normal definitions
   int n8 = n>>3;
   foreach (int i; 0..n8) *rev++ = cast(ushort)((bit_reverse(i)>>(32-ld+3))<<2); //k8
 }
 
-private int init_blocksize (VorbisDecoder f, int b, int n) {
+int init_blocksize (VorbisDecoder f, int b, int n) {
   int n2 = n>>1, n4 = n>>2, n8 = n>>3;
   f.A[b] = setup_malloc!float(f, n2);
   f.B[b] = setup_malloc!float(f, n2);
@@ -978,7 +982,7 @@ private int init_blocksize (VorbisDecoder f, int b, int n) {
   return true;
 }
 
-private void neighbors (ushort* x, int n, ushort* plow, ushort* phigh) {
+void neighbors (ushort* x, int n, ushort* plow, ushort* phigh) {
   int low = -1;
   int high = 65536;
   assert(n >= 0 && n <= ushort.max);
@@ -1001,7 +1005,7 @@ extern(C) int point_compare (const void *p, const void *q) {
 /////////////////////// END LEAF SETUP FUNCTIONS //////////////////////////
 
 // ///////////////////////////////////////////////////////////////////// //
-private ubyte get8 (VorbisDecoder f) {
+ubyte get8 (VorbisDecoder f) {
   ubyte b = void;
   if (!f.eof) {
     if (f.rawRead((&b)[0..1]) != 1) { f.eof = true; b = 0; }
@@ -1009,7 +1013,7 @@ private ubyte get8 (VorbisDecoder f) {
   return b;
 }
 
-private uint get32 (VorbisDecoder f) {
+uint get32 (VorbisDecoder f) {
   uint x = 0;
   if (!f.eof) {
     version(LittleEndian) {
@@ -1024,19 +1028,19 @@ private uint get32 (VorbisDecoder f) {
   return x;
 }
 
-private bool getn (VorbisDecoder f, void* data, int n) {
+bool getn (VorbisDecoder f, void* data, int n) {
   if (f.eof || n < 0) return false;
   if (n == 0) return true;
   if (f.rawRead(data[0..n]) != n) { f.eof = true; return false; }
   return true;
 }
 
-private void skip (VorbisDecoder f, int n) {
+void skip (VorbisDecoder f, int n) {
   if (f.eof || n <= 0) return;
   f.rawSkip(n);
 }
 
-private void set_file_offset (VorbisDecoder f, uint loc) {
+void set_file_offset (VorbisDecoder f, uint loc) {
   /+if (f.push_mode) return;+/
   f.eof = false;
   if (loc >= 0x80000000) { f.eof = true; return; }
@@ -1046,7 +1050,7 @@ private void set_file_offset (VorbisDecoder f, uint loc) {
 
 immutable char[4] ogg_page_header = "OggS"; //[ 0x4f, 0x67, 0x67, 0x53 ];
 
-private bool capture_pattern (VorbisDecoder f) {
+bool capture_pattern (VorbisDecoder f) {
   static if (__VERSION__ > 2067) pragma(inline, true);
   char[4] sign = void;
   if (!getn(f, sign.ptr, 4)) return false;
@@ -1057,7 +1061,7 @@ enum PAGEFLAG_continued_packet = 1;
 enum PAGEFLAG_first_page = 2;
 enum PAGEFLAG_last_page = 4;
 
-private int start_page_no_capturepattern (VorbisDecoder f) {
+int start_page_no_capturepattern (VorbisDecoder f) {
   uint loc0, loc1, n;
   // stream structure version
   if (get8(f) != 0) return error(f, STBVorbisError.invalid_stream_structure_version);
@@ -1105,12 +1109,12 @@ private int start_page_no_capturepattern (VorbisDecoder f) {
   return true;
 }
 
-private int start_page (VorbisDecoder f) {
+int start_page (VorbisDecoder f) {
   if (!capture_pattern(f)) return error(f, STBVorbisError.missing_capture_pattern);
   return start_page_no_capturepattern(f);
 }
 
-private int start_packet (VorbisDecoder f) {
+int start_packet (VorbisDecoder f) {
   while (f.next_seg == -1) {
     if (!start_page(f)) return false;
     if (f.page_flag&PAGEFLAG_continued_packet) return error(f, STBVorbisError.continued_packet_flag_invalid);
@@ -1123,7 +1127,7 @@ private int start_packet (VorbisDecoder f) {
   return true;
 }
 
-private int maybe_start_packet (VorbisDecoder f) {
+int maybe_start_packet (VorbisDecoder f) {
   if (f.next_seg == -1) {
     auto x = get8(f);
     if (f.eof) return false; // EOF at page boundary is not an error!
@@ -1143,7 +1147,7 @@ private int maybe_start_packet (VorbisDecoder f) {
   return start_packet(f);
 }
 
-private int next_segment (VorbisDecoder f) {
+int next_segment (VorbisDecoder f) {
   if (f.last_seg) return 0;
   if (f.next_seg == -1) {
     f.last_seg_which = f.segment_count-1; // in case start_page fails
@@ -1164,7 +1168,7 @@ private int next_segment (VorbisDecoder f) {
 enum EOP = (-1);
 enum INVALID_BITS = (-1);
 
-private int get8_packet_raw (VorbisDecoder f) {
+int get8_packet_raw (VorbisDecoder f) {
   if (!f.bytes_in_seg) {  // CLANG!
     if (f.last_seg) return EOP;
     else if (!next_segment(f)) return EOP;
@@ -1175,13 +1179,13 @@ private int get8_packet_raw (VorbisDecoder f) {
   return get8(f);
 }
 
-private int get8_packet (VorbisDecoder f) {
+int get8_packet (VorbisDecoder f) {
   int x = get8_packet_raw(f);
   f.valid_bits = 0;
   return x;
 }
 
-private uint get32_packet (VorbisDecoder f) {
+uint get32_packet (VorbisDecoder f) {
   uint x = get8_packet(f), b;
   if (x == EOP) return EOP;
   if ((b = get8_packet(f)) == EOP) return EOP;
@@ -1193,13 +1197,13 @@ private uint get32_packet (VorbisDecoder f) {
   return x;
 }
 
-private void flush_packet (VorbisDecoder f) {
+void flush_packet (VorbisDecoder f) {
   while (get8_packet_raw(f) != EOP) {}
 }
 
 // @OPTIMIZE: this is the secondary bit decoder, so it's probably not as important
 // as the huffman decoder?
-private uint get_bits_main (VorbisDecoder f, int n) {
+uint get_bits_main (VorbisDecoder f, int n) {
   uint z;
   if (f.valid_bits < 0) return 0;
   if (f.valid_bits < n) {
@@ -1228,7 +1232,7 @@ private uint get_bits_main (VorbisDecoder f, int n) {
 }
 
 // chooses minimal possible integer type
-private auto get_bits(ubyte n) (VorbisDecoder f) if (n >= 1 && n <= 64) {
+auto get_bits(ubyte n) (VorbisDecoder f) if (n >= 1 && n <= 64) {
   static if (n <= 8) return cast(ubyte)get_bits_main(f, n);
   else static if (n <= 16) return cast(ushort)get_bits_main(f, n);
   else static if (n <= 32) return cast(uint)get_bits_main(f, n);
@@ -1237,7 +1241,7 @@ private auto get_bits(ubyte n) (VorbisDecoder f) if (n >= 1 && n <= 64) {
 }
 
 // chooses minimal possible integer type, assume no overflow
-private auto get_bits_add_no(ubyte n) (VorbisDecoder f, ubyte add) if (n >= 1 && n <= 64) {
+auto get_bits_add_no(ubyte n) (VorbisDecoder f, ubyte add) if (n >= 1 && n <= 64) {
   static if (n <= 8) return cast(ubyte)(get_bits_main(f, n)+add);
   else static if (n <= 16) return cast(ushort)(get_bits_main(f, n)+add);
   else static if (n <= 32) return cast(uint)(get_bits_main(f, n)+add);
@@ -1249,7 +1253,7 @@ private auto get_bits_add_no(ubyte n) (VorbisDecoder f, ubyte add) if (n >= 1 &&
 // expand the buffer to as many bits as possible without reading off end of packet
 // it might be nice to allow f.valid_bits and f.acc to be stored in registers,
 // e.g. cache them locally and decode locally
-//private /*__forceinline*/ void prep_huffman (VorbisDecoder f)
+///*__forceinline*/ void prep_huffman (VorbisDecoder f)
 enum PrepHuffmanMixin = q{
   if (f.valid_bits <= 24) {
     if (f.valid_bits == 0) f.acc = 0;
@@ -1270,7 +1274,7 @@ enum VorbisPacket {
   setup = 5,
 }
 
-private int codebook_decode_scalar_raw (VorbisDecoder f, Codebook *c) {
+int codebook_decode_scalar_raw (VorbisDecoder f, Codebook *c) {
   mixin(PrepHuffmanMixin);
 
   if (c.codewords is null && c.sorted_codewords is null) return -1;
@@ -1361,7 +1365,7 @@ enum CODEBOOK_ELEMENT_FAST(string c, string off) = "("~c~".multiplicands["~off~"
 enum CODEBOOK_ELEMENT_BASE(string c) = "(0)";
 
 
-private int codebook_decode_start (VorbisDecoder f, Codebook* c) {
+int codebook_decode_start (VorbisDecoder f, Codebook* c) {
   int z = -1;
   // type 0 is only legal in a scalar context
   if (c.lookup_type == 0) {
@@ -1377,7 +1381,7 @@ private int codebook_decode_start (VorbisDecoder f, Codebook* c) {
   return z;
 }
 
-private int codebook_decode (VorbisDecoder f, Codebook* c, float* output, int len) {
+int codebook_decode (VorbisDecoder f, Codebook* c, float* output, int len) {
   int z = codebook_decode_start(f, c);
   if (z < 0) return false;
   if (len > c.dimensions) len = c.dimensions;
@@ -1413,7 +1417,7 @@ private int codebook_decode (VorbisDecoder f, Codebook* c, float* output, int le
   return true;
 }
 
-private int codebook_decode_step (VorbisDecoder f, Codebook* c, float* output, int len, int step) {
+int codebook_decode_step (VorbisDecoder f, Codebook* c, float* output, int len, int step) {
   int z = codebook_decode_start(f, c);
   float last = mixin(CODEBOOK_ELEMENT_BASE!"c");
   if (z < 0) return false;
@@ -1443,7 +1447,7 @@ private int codebook_decode_step (VorbisDecoder f, Codebook* c, float* output, i
   return true;
 }
 
-private int codebook_decode_deinterleave_repeat (VorbisDecoder f, Codebook* c, ref float*[STB_VORBIS_MAX_CHANNELS] outputs, int ch, int* c_inter_p, int* p_inter_p, int len, int total_decode) {
+int codebook_decode_deinterleave_repeat (VorbisDecoder f, Codebook* c, ref float*[STB_VORBIS_MAX_CHANNELS] outputs, int ch, int* c_inter_p, int* p_inter_p, int len, int total_decode) {
   int c_inter = *c_inter_p;
   int p_inter = *p_inter_p;
   int z, effective = c.dimensions;
@@ -1505,7 +1509,7 @@ private int codebook_decode_deinterleave_repeat (VorbisDecoder f, Codebook* c, r
   return true;
 }
 
-//private int predict_point (int x, int x0, int x1, int y0, int y1)
+//int predict_point (int x, int x0, int x1, int y0, int y1)
 enum predict_point(string dest, string x, string x0, string x1, string y0, string y1) = q{{
   //import std.math : abs;
   int dy = ${y1}-${y0};
@@ -1666,7 +1670,7 @@ enum draw_line(string output, string x0, string y0, string x1, string y1, string
   */
 }}.cmacroFixVars!("output", "x0", "y0", "x1", "y1", "n")(output, x0, y0, x1, y1, n);
 
-private int residue_decode (VorbisDecoder f, Codebook* book, float* target, int offset, int n, int rtype) {
+int residue_decode (VorbisDecoder f, Codebook* book, float* target, int offset, int n, int rtype) {
   if (rtype == 0) {
     int step = n/book.dimensions;
     foreach (immutable k; 0..step) if (!codebook_decode_step(f, book, target+offset+k, n-offset-k, step)) return false;
@@ -1680,7 +1684,7 @@ private int residue_decode (VorbisDecoder f, Codebook* book, float* target, int 
   return true;
 }
 
-private void decode_residue (VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] residue_buffers, int ch, int n, int rn, ubyte* do_not_decode) {
+void decode_residue (VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] residue_buffers, int ch, int n, int rn, ubyte* do_not_decode) {
   import core.stdc.stdlib : alloca;
   import core.stdc.string : memset;
 
@@ -1901,7 +1905,7 @@ private void decode_residue (VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS
 // the following were split out into separate functions while optimizing;
 // they could be pushed back up but eh. __forceinline showed no change;
 // they're probably already being inlined.
-private void imdct_step3_iter0_loop (int n, float* e, int i_off, int k_off, float* A) {
+void imdct_step3_iter0_loop (int n, float* e, int i_off, int k_off, float* A) {
   float* ee0 = e+i_off;
   float* ee2 = ee0+k_off;
   debug(stb_vorbis) assert((n&3) == 0);
@@ -1943,7 +1947,7 @@ private void imdct_step3_iter0_loop (int n, float* e, int i_off, int k_off, floa
   }
 }
 
-private void imdct_step3_inner_r_loop (int lim, float* e, int d0, int k_off, float* A, int k1) {
+void imdct_step3_inner_r_loop (int lim, float* e, int d0, int k_off, float* A, int k1) {
   float k00_20, k01_21;
   float* e0 = e+d0;
   float* e2 = e0+k_off;
@@ -1989,7 +1993,7 @@ private void imdct_step3_inner_r_loop (int lim, float* e, int d0, int k_off, flo
   }
 }
 
-private void imdct_step3_inner_s_loop (int n, float* e, int i_off, int k_off, float* A, int a_off, int k0) {
+void imdct_step3_inner_s_loop (int n, float* e, int i_off, int k_off, float* A, int a_off, int k0) {
   float A0 = A[0];
   float A1 = A[0+1];
   float A2 = A[0+a_off];
@@ -2112,7 +2116,7 @@ static void imdct_step3_inner_s_loop_ld654(int n, float *e, int i_off, float *A,
     }
 }
 
-private void inverse_mdct (float* buffer, int n, VorbisDecoder f, int blocktype) {
+void inverse_mdct (float* buffer, int n, VorbisDecoder f, int blocktype) {
   import core.stdc.stdlib : alloca;
 
   int n2 = n>>1, n4 = n>>2, n8 = n>>3, l;
@@ -2402,7 +2406,7 @@ private void inverse_mdct (float* buffer, int n, VorbisDecoder f, int blocktype)
   temp_alloc_restore(f, save_point);
 }
 
-private float *get_window (VorbisDecoder f, int len) {
+float *get_window (VorbisDecoder f, int len) {
   len <<= 1;
   if (len == f.blocksize_0) return f.window.ptr[0];
   if (len == f.blocksize_1) return f.window.ptr[1];
@@ -2415,7 +2419,7 @@ version(STB_VORBIS_NO_DEFER_FLOOR) {
   alias YTYPE = short;
 }
 
-private int do_floor (VorbisDecoder f, Mapping* map, int i, int n, float* target, YTYPE* finalY, ubyte* step2_flag) {
+int do_floor (VorbisDecoder f, Mapping* map, int i, int n, float* target, YTYPE* finalY, ubyte* step2_flag) {
   int n2 = n>>1;
   int s = map.chan[i].mux, floor;
   floor = map.submap_floor.ptr[s];
@@ -2460,7 +2464,7 @@ private int do_floor (VorbisDecoder f, Mapping* map, int i, int n, float* target
 //        has to be the same as frame N+1's left_end-left_start (which they are by
 //        construction)
 
-private int vorbis_decode_initial (VorbisDecoder f, int* p_left_start, int* p_left_end, int* p_right_start, int* p_right_end, int* mode) {
+int vorbis_decode_initial (VorbisDecoder f, int* p_left_start, int* p_left_end, int* p_right_start, int* p_right_end, int* mode) {
   Mode *m;
   int i, n, prev, next, window_center;
   f.channel_buffer_start = f.channel_buffer_end = 0;
@@ -2510,7 +2514,7 @@ private int vorbis_decode_initial (VorbisDecoder f, int* p_left_start, int* p_le
   return true;
 }
 
-private int vorbis_decode_packet_rest (VorbisDecoder f, int* len, Mode* m, int left_start, int left_end, int right_start, int right_end, int* p_left) {
+int vorbis_decode_packet_rest (VorbisDecoder f, int* len, Mode* m, int left_start, int left_end, int right_start, int right_end, int* p_left) {
   import core.stdc.string : memcpy, memset;
 
   Mapping* map;
@@ -2753,13 +2757,13 @@ private int vorbis_decode_packet_rest (VorbisDecoder f, int* len, Mode* m, int l
   return true;
 }
 
-private int vorbis_decode_packet (VorbisDecoder f, int* len, int* p_left, int* p_right) {
+int vorbis_decode_packet (VorbisDecoder f, int* len, int* p_left, int* p_right) {
   int mode, left_end, right_end;
   if (!vorbis_decode_initial(f, p_left, &left_end, p_right, &right_end, &mode)) return 0;
   return vorbis_decode_packet_rest(f, len, f.mode_config.ptr+mode, *p_left, left_end, *p_right, right_end, p_left);
 }
 
-private int vorbis_finish_frame (VorbisDecoder f, int len, int left, int right) {
+int vorbis_finish_frame (VorbisDecoder f, int len, int left, int right) {
   // we use right&left (the start of the right- and left-window sin()-regions)
   // to determine how much to return, rather than inferring from the rules
   // (same result, clearer code); 'left' indicates where our sin() window
@@ -2811,7 +2815,7 @@ private int vorbis_finish_frame (VorbisDecoder f, int len, int left, int right) 
   return right-left;
 }
 
-private bool vorbis_pump_first_frame (VorbisDecoder f) {
+bool vorbis_pump_first_frame (VorbisDecoder f) {
   int len, right, left;
   if (vorbis_decode_packet(f, &len, &left, &right)) {
     vorbis_finish_frame(f, len, left, right);
@@ -2821,7 +2825,7 @@ private bool vorbis_pump_first_frame (VorbisDecoder f) {
 }
 
 /+ k8: i don't need that, so it's dead
-private int is_whole_packet_present (VorbisDecoder f, int end_page) {
+int is_whole_packet_present (VorbisDecoder f, int end_page) {
   import core.stdc.string : memcmp;
 
   // make sure that we have the packet available before continuing...
@@ -2879,7 +2883,7 @@ private int is_whole_packet_present (VorbisDecoder f, int end_page) {
 }
 +/
 
-private int start_decoder (VorbisDecoder f) {
+int start_decoder (VorbisDecoder f) {
   import core.stdc.string : memcpy, memset;
 
   ubyte[6] header;
@@ -3454,7 +3458,7 @@ private int start_decoder (VorbisDecoder f) {
 }
 
 /+
-private int vorbis_search_for_page_pushdata (VorbisDecoder f, ubyte* data, int data_len) {
+int vorbis_search_for_page_pushdata (VorbisDecoder f, ubyte* data, int data_len) {
   import core.stdc.string : memcmp;
 
   foreach (immutable i; 0..f.page_crc_tests) f.scan.ptr[i].bytes_done = 0;
@@ -3534,7 +3538,7 @@ private int vorbis_search_for_page_pushdata (VorbisDecoder f, ubyte* data, int d
 }
 +/
 
-private uint vorbis_find_page (VorbisDecoder f, uint* end, uint* last) {
+uint vorbis_find_page (VorbisDecoder f, uint* end, uint* last) {
   for (;;) {
     if (f.eof) return 0;
     auto n = get8(f);
@@ -3599,7 +3603,7 @@ enum SAMPLE_unknown = 0xffffffff;
 // two initial interpolation-style probes are used at the start of the search
 // to try to bound either side of the binary search sensibly, while still
 // working in O(log n) time if they fail.
-private int get_seek_page_info (VorbisDecoder f, ProbedPage* z) {
+int get_seek_page_info (VorbisDecoder f, ProbedPage* z) {
   ubyte[27] header;
   ubyte[255] lacing;
 
@@ -3627,7 +3631,7 @@ private int get_seek_page_info (VorbisDecoder f, ProbedPage* z) {
 }
 
 // rarely used function to seek back to the preceeding page while finding the start of a packet
-private int go_to_page_before (VorbisDecoder f, uint limit_offset) {
+int go_to_page_before (VorbisDecoder f, uint limit_offset) {
   uint previous_safe, end;
 
   // now we want to seek back 64K from the limit
@@ -3651,7 +3655,7 @@ private int go_to_page_before (VorbisDecoder f, uint limit_offset) {
 // the function succeeds, current_loc_valid will be true and current_loc will
 // be less than or equal to the provided sample number (the closer the
 // better).
-private int seek_to_sample_coarse (VorbisDecoder f, uint sample_number) {
+int seek_to_sample_coarse (VorbisDecoder f, uint sample_number) {
   ProbedPage left, right, mid;
   int i, start_seg_with_known_loc, end_pos, page_start;
   uint delta, stream_length, padding;
@@ -3779,7 +3783,7 @@ error:
 }
 
 // the same as vorbis_decode_initial, but without advancing
-private int peek_decode_initial (VorbisDecoder f, int* p_left_start, int* p_left_end, int* p_right_start, int* p_right_end, int* mode) {
+int peek_decode_initial (VorbisDecoder f, int* p_left_start, int* p_left_end, int* p_right_start, int* p_right_end, int* mode) {
   if (!vorbis_decode_initial(f, p_left_start, p_left_end, p_right_start, p_right_end, mode)) return 0;
 
   // either 1 or 2 bytes were read, figure out which so we can rewind
@@ -3840,7 +3844,7 @@ version(STB_VORBIS_NO_FAST_SCALED_FLOAT) {
     .cmacroFixVars!("x", "s", "MAGIC", "ADDEND")(x, s, MAGIC!(s), ADDEND!(s));
 }
 
-private void copy_samples (short* dest, float* src, int len) {
+void copy_samples (short* dest, float* src, int len) {
   //check_endianness();
   mixin(declfcvar!"temp");
   foreach (immutable _; 0..len) {
@@ -3851,7 +3855,7 @@ private void copy_samples (short* dest, float* src, int len) {
   }
 }
 
-private void compute_samples (int mask, short* output, int num_c, float** data, int d_offset, int len) {
+void compute_samples (int mask, short* output, int num_c, float** data, int d_offset, int len) {
   import core.stdc.string : memset;
   enum BUFFER_SIZE = 32;
   float[BUFFER_SIZE] buffer;
@@ -3872,7 +3876,7 @@ private void compute_samples (int mask, short* output, int num_c, float** data, 
   }
 }
 
-private void compute_stereo_samples (short* output, int num_c, float** data, int d_offset, int len) {
+void compute_stereo_samples (short* output, int num_c, float** data, int d_offset, int len) {
   import core.stdc.string : memset;
 
   enum BUFFER_SIZE = 32;
@@ -3907,7 +3911,7 @@ private void compute_stereo_samples (short* output, int num_c, float** data, int
   }
 }
 
-private void convert_samples_short (int buf_c, short** buffer, int b_offset, int data_c, float** data, int d_offset, int samples) {
+void convert_samples_short (int buf_c, short** buffer, int b_offset, int data_c, float** data, int d_offset, int samples) {
   import core.stdc.string : memset;
 
   if (buf_c != data_c && buf_c <= 2 && data_c <= 6) {
@@ -3920,7 +3924,7 @@ private void convert_samples_short (int buf_c, short** buffer, int b_offset, int
   }
 }
 
-private void convert_channels_short_interleaved (int buf_c, short* buffer, int data_c, float** data, int d_offset, int len) {
+void convert_channels_short_interleaved (int buf_c, short* buffer, int data_c, float** data, int d_offset, int len) {
   //check_endianness();
   mixin(declfcvar!"temp");
   if (buf_c != data_c && buf_c <= 2 && data_c <= 6) {
@@ -4845,13 +4849,13 @@ public:
   }
 
 private: // k8: 'cause i'm evil
-  private enum cmt_len_size = 2;
+  enum cmt_len_size = 2;
   nothrow /*@trusted*/ @nogc {
     public @property bool comment_empty () const pure { return (comment_get_line_len == 0); }
 
     // 0: error
     // includes length itself
-    private uint comment_get_line_len () const pure {
+    uint comment_get_line_len () const pure {
       if (comment_data_pos >= comment_size) return 0;
       if (comment_size-comment_data_pos < cmt_len_size) return 0;
       uint len = comment_data[comment_data_pos];
