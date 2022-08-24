@@ -3873,7 +3873,13 @@ error:
 }
 
 // the same as vorbis_decode_initial, but without advancing
-int peek_decode_initial (ref VorbisDecoder f, int* p_left_start, int* p_left_end, int* p_right_start, int* p_right_end, int* mode) {
+int peek_decode_initial (
+ref VorbisDecoder f,
+int* p_left_start,
+int* p_left_end,
+int* p_right_start,
+int* p_right_end,
+int* mode) {
   if (!vorbis_decode_initial(f, p_left_start, p_left_end, p_right_start, p_right_end, mode)) return 0;
 
   // either 1 or 2 bytes were read, figure out which so we can rewind
@@ -3915,7 +3921,10 @@ version(STB_VORBIS_NO_FAST_SCALED_FLOAT) {
   enum declfcvar(string name) = "{}";
   template FAST_SCALED_FLOAT_TO_INT(string x, string s) {
     static assert(s == "15");
-    enum FAST_SCALED_FLOAT_TO_INT = q{import core.stdc.math : lrintf; int v = lrintf((${x})*32768.0f);}.cmacroFixVars!"x"(x);
+    enum FAST_SCALED_FLOAT_TO_INT = q{
+        import core.stdc.math : lrintf;
+        int v = lrintf((${x})*32768.0f);
+        }.cmacroFixVars!"x"(x);
   }
 } else {
   //k8: actually, this is only marginally faster than using `lrintf()`, but anyway...
