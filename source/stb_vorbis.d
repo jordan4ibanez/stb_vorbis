@@ -4834,7 +4834,8 @@ public:
     while (n < len) {
       int k = channel_buffer_end-channel_buffer_start;
       if (n+k >= len) k = len-n;
-      if (k) convert_channels_short_interleaved(channels, buffer, vrchannels, channel_buffers.ptr, channel_buffer_start, k);
+      if (k)
+        convert_channels_short_interleaved(channels, buffer, vrchannels, channel_buffers.ptr, channel_buffer_start, k);
       buffer += k*channels;
       n += k;
       channel_buffer_start += k;
