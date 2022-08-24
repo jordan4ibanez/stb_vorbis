@@ -1084,15 +1084,18 @@ int start_page_no_capturepattern (ref VorbisDecoder f) {
   // absolute granule position
   loc0 = get32(f);
   loc1 = get32(f);
+
+  // This is put here to turn off IDE warnings
+  uint discardConsumer;
   // @TODO: validate loc0, loc1 as valid positions?
   // stream serial number -- vorbis doesn't interleave, so discard
-  get32(f);
+  discardConsumer = get32(f);
   //if (f.serial != get32(f)) return error(f, STBVorbisError.incorrect_stream_serial_number);
   // page sequence number
   n = get32(f);
   f.last_page = n;
   // CRC32
-  get32(f);
+  discardConsumer = get32(f);
   // page_segments
   f.segment_count = get8(f);
   if (!getn(f, f.segments.ptr, f.segment_count)) return error(f, STBVorbisError.unexpected_eof);
