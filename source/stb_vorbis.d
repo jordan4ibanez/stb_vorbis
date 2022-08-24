@@ -5189,7 +5189,7 @@ template cmacroFixVars(T...) {
     if (pos < s.length) res ~= s[pos..$];
     return res;
   }
-}
+} // This warning will never be fixed
 
 // ////////////////////////////////////////////////////////////////////////// //
 /* Version history
