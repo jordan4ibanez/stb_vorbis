@@ -4324,7 +4324,9 @@ public:
     eof = false;
     read_comments = true;
     if (start_decoder(&this)) {
-      vorbis_pump_first_frame(&this);
+      // This is put here to turn off IDE warnings
+      uint discardConsumer;
+      discardConsumer = vorbis_pump_first_frame(&this);
       return;
     }
     auto err = error;
