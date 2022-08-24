@@ -4210,9 +4210,24 @@ private:
     }
     return 0;
   }
-  void rawSkip (int n) { static if (__VERSION__ > 2067) pragma(inline, true); if (isOpened && n > 0) { if ((stpos += n) > stend) stpos = stend; } }
-  void rawSeek (int n) { static if (__VERSION__ > 2067) pragma(inline, true); if (isOpened) { stpos = stst+(n < 0 ? 0 : n); if (stpos > stend) stpos = stend; } }
-  void rawClose () { static if (__VERSION__ > 2067) pragma(inline, true); if (isOpened) { isOpened = false; stmread(null, 0, this); } }
+  void rawSkip (int n) {
+    static if (__VERSION__ > 2067) pragma(inline, true);
+    if (isOpened && n > 0) {
+        if ((stpos += n) > stend) stpos = stend;
+        }
+    }
+  void rawSeek (int n) {
+    static if (__VERSION__ > 2067) pragma(inline, true);
+    if (isOpened) {
+        stpos = stst+(n < 0 ? 0 : n); if (stpos > stend) stpos = stend;
+        }
+    }
+  void rawClose () {
+    static if (__VERSION__ > 2067) pragma(inline, true);
+    if (isOpened) {
+        isOpened = false; stmread(null, 0, this);
+        }
+    }
 
 final:
 private:
