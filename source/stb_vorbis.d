@@ -1338,7 +1338,10 @@ int codebook_decode_scalar_raw (ref VorbisDecoder f, Codebook *c) {
       return -1;
     }
   }
-  error(f, STBVorbisError.invalid_stream);
+  
+  // This is put here as a way to turn off IDE warnings
+  uint discardConsumer;
+  discardConsumer = error(f, STBVorbisError.invalid_stream);
   f.valid_bits = 0;
   return -1;
 }
@@ -1386,13 +1389,17 @@ int codebook_decode_start (ref VorbisDecoder f, Codebook* c) {
   int z = -1;
   // type 0 is only legal in a scalar context
   if (c.lookup_type == 0) {
-    error(f, STBVorbisError.invalid_stream);
+    // This is put here as a way to turn off IDE warnings
+    uint discardConsumer;
+    discardConsumer = error(f, STBVorbisError.invalid_stream);
   } else {
     mixin(DECODE_VQ!("z", "c"));
     debug(stb_vorbis) if (c.sparse) assert(z < c.sorted_entries);
     if (z < 0) {  // check for EOP
       if (!f.bytes_in_seg && f.last_seg) return z;
-      error(f, STBVorbisError.invalid_stream);
+      // This is put here as a way to turn off IDE warnings
+      uint discardConsumer;
+      discardConsumer = error(f, STBVorbisError.invalid_stream);
     }
   }
   return z;
