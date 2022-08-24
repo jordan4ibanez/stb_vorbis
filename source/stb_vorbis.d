@@ -4968,7 +4968,8 @@ public:
 
   int getSamplesFloat (int achans, float** buffer, int num_samples) {
     import core.stdc.string : memcpy, memset;
-    float** outputs;
+    // Renamed this from outputs to scopeOutputs to stop override of outer scope's variable
+    float** scopeOutputs;
     int n = 0;
     int z = vrchannels;
     if (z > achans) z = achans;
@@ -4982,7 +4983,7 @@ public:
       n += k;
       channel_buffer_start += k;
       if (n == num_samples) break;
-      if (!getFrameFloat(null, &outputs)) break;
+      if (!getFrameFloat(null, &scopeOutputs)) break;
     }
     return n;
   }
