@@ -4604,16 +4604,16 @@ public:
   }
   +/
 
-  public uint fileOffset () {
+  uint fileOffset () {
     if (/+push_mode ||+/ !isOpened) return 0;
     /+if (stream !is null) return cast(uint)(stream-stream_start);+/
     return (stpos > stst ? stpos-stst : 0);
   }
 
-  public uint stream_len () { return stend-stst; }
+  uint stream_len () { return stend-stst; }
 
   // DATA-PULLING API
-  public int seekFrame (uint sample_number) {
+  int seekFrame (uint sample_number) {
     uint max_frame_samples;
 
     /+if (this.push_mode) return -.error(this, STBVorbisError.invalid_api_mixing);+/
@@ -4628,7 +4628,8 @@ public:
     max_frame_samples = (this.blocksize_1*3-this.blocksize_0)>>2;
     while (this.current_loc < sample_number) {
       int left_start, left_end, right_start, right_end, mode, frame_samples;
-      if (!peek_decode_initial(this, &left_start, &left_end, &right_start, &right_end, &mode)) return .error(this, STBVorbisError.seek_failed);
+      if (!peek_decode_initial(this, &left_start, &left_end, &right_start, &right_end, &mode))
+        return .error(this, STBVorbisError.seek_failed);
       // calculate the number of samples returned by the next frame
       frame_samples = right_start-left_start;
       if (this.current_loc+frame_samples > sample_number) {
@@ -4653,7 +4654,7 @@ public:
     return 1;
   }
 
-  public int seek (uint sample_number) {
+  int seek (uint sample_number) {
     if (!seekFrame(sample_number)) return 0;
     if (sample_number != this.current_loc) {
       int n;
