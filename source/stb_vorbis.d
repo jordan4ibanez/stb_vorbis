@@ -4966,7 +4966,7 @@ public:
   }
   +/
 
-  public int getSamplesFloat (int achans, float** buffer, int num_samples) {
+  int getSamplesFloat (int achans, float** buffer, int num_samples) {
     import core.stdc.string : memcpy, memset;
     float** outputs;
     int n = 0;
