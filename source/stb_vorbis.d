@@ -4093,7 +4093,6 @@ private:
   bool stclose;
   FILE* stfl;
 
-private:
   //ubyte* stream;
   //ubyte* stream_start;
   //ubyte* stream_end;
@@ -4184,7 +4183,7 @@ private:
   int channel_buffer_start;
   int channel_buffer_end;
 
-private: // k8: 'cause i'm evil
+  // k8: 'cause i'm evil
   // user-accessible info
   uint sample_rate;
   int vrchannels;
@@ -4200,7 +4199,7 @@ private: // k8: 'cause i'm evil
   // functions to get comment data
   uint comment_data_pos;
 
-private:
+
   int rawRead (void[] buf) {
     static if (__VERSION__ > 2067) pragma(inline, true);
     if (isOpened && buf.length > 0 && stpos < stend) {
