@@ -3960,7 +3960,7 @@ void convert_channels_short_interleaved (int buf_c, short* buffer, int data_c, f
 } // @nogc
 
 
-public class VorbisDecoder {
+public struct VorbisDecoder {
   // return # of bytes read, 0 on eof, -1 on error
   // if called with `buf is null`, do `close()`
   alias readCB = int delegate (void[] buf, uint ofs, VorbisDecoder vb) nothrow @nogc;
