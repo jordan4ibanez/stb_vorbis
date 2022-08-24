@@ -4044,7 +4044,7 @@ void convert_channels_short_interleaved (int buf_c, short* buffer, int data_c, f
       foreach (immutable i; 0..limit) {
         float f = data[i][d_offset+j];
         mixin(FAST_SCALED_FLOAT_TO_INT!("f", "15"));//data[i][d_offset+j], 15);
-        if (cast(uint)(v+32768) > 65535) v = (v < 0 ? -32768 : 32767);
+        if (cast(uint)(v+32_768) > 65_535) v = (v < 0 ? -32_768 : 32_767);
         *buffer++ = cast(short)v; //k8
       }
       foreach (immutable i; limit..buf_c) *buffer++ = 0;
