@@ -4727,7 +4727,12 @@ public:
       set_file_offset(this, last_page_loc);
 
       // parse the header
-      getn(this, cast(ubyte*)header, 6);
+      // Needs to scope, otherwise dmd gives an error about goto
+      {
+        // This is put here to turn off IDE warnings
+        uint discardConsumer;
+        discardConsumer = getn(this, cast(ubyte*)header, 6);
+      }
       // extract the absolute granule position
       lo = get32(this);
       hi = get32(this);
