@@ -4285,10 +4285,16 @@ public:
 		return;
 	}
   }
-  this (FILE* fl, bool doclose=true) { open(fl, doclose); }
-  this (const(char)[] filename) { open(filename); }
+  this (FILE* fl, bool doclose=true) {
+    open(fl, doclose);
+  }
+  this (const(char)[] filename) {
+    open(filename);
+  }
 
-  @property bool closed () { return !isOpened; }
+  @property bool closed () {
+    return !isOpened;
+  }
 
   void open (FILE *fl, bool doclose=true) {
     import core.stdc.stdio : ftell, fseek, SEEK_SET, SEEK_END;
