@@ -2639,7 +2639,10 @@ int* p_left) {
           int high = g.neighbors.ptr[j].ptr[1];
           //neighbors(g.xList, j, &low, &high);
           int pred = void;
-          mixin(predict_point!("pred", "g.xList.ptr[j]", "g.xList.ptr[low]", "g.xList.ptr[high]", "finalY[low]", "finalY[high]"));
+          mixin(predict_point!(
+            "pred", "g.xList.ptr[j]", "g.xList.ptr[low]", "g.xList.ptr[high]", "finalY[low]", "finalY[high]"
+            )
+          );
           int val = finalY[j];
           int highroom = range-pred;
           int lowroom = pred;
@@ -2659,8 +2662,9 @@ int* p_left) {
         }
 
         version(STB_VORBIS_NO_DEFER_FLOOR) {
-            
-          do_floor(f, map, i, n, f.floor_buffers.ptr[i], finalY, step2_flag);
+          // This is put here to turn off IDE warnings
+          uint discardConsumer;
+          discardConsumer = do_floor(f, map, i, n, f.floor_buffers.ptr[i], finalY, step2_flag);
         } else {
           // defer final floor computation until _after_ residue
           foreach (immutable j; 0..g.values) if (!step2_flag[j]) finalY[j] = -1;
