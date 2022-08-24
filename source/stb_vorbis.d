@@ -603,8 +603,16 @@ int error (VorbisDecoder f, STBVorbisError e) {
 // while decoding. if you can afford the stack space, use
 // alloca(); otherwise, provide a temp buffer and it will
 // allocate out of those.
-uint temp_alloc_save (VorbisDecoder f) nothrow @nogc { static if (__VERSION__ > 2067) pragma(inline, true); return f.alloc.tempSave(f); }
-void temp_alloc_restore (VorbisDecoder f, uint p) nothrow @nogc { static if (__VERSION__ > 2067) pragma(inline, true); f.alloc.tempRestore(p, f); }
+uint temp_alloc_save (VorbisDecoder f) nothrow @nogc {
+    static if (__VERSION__ > 2067) pragma(inline, true);
+    return f.alloc.tempSave(f);
+}
+
+void temp_alloc_restore (VorbisDecoder f, uint p) nothrow @nogc {
+    static if (__VERSION__ > 2067) pragma(inline, true);
+    f.alloc.tempRestore(p, f);
+
+}
 void temp_free (VorbisDecoder f, void* p) nothrow @nogc {}
 /*
 T* temp_alloc(T) (VorbisDecoder f, uint count) nothrow @nogc {
@@ -627,10 +635,14 @@ template temp_block_array(string count, string size) {
     .cmacroFixVars!("count", "size", "tam")(count, size, temp_alloc!(array_size_required!(count, size)));
 }
 +/
-enum array_size_required(string count, string size) = q{((${count})*((void*).sizeof+(${size})))}.cmacroFixVars!("count", "size")(count, size);
+enum array_size_required(string count, string size) = q{
+    ((${count})*((void*).sizeof+(${size})))
+}.cmacroFixVars!("count", "size")(count, size);
 
 template temp_alloc(string size) {
-  enum temp_alloc = q{alloca(${size})}.cmacroFixVars!("size")(size);
+  enum temp_alloc = q{
+    alloca(${size})
+}.cmacroFixVars!("size")(size);
 }
 
 template temp_block_array(string count, string size) {
@@ -730,7 +742,7 @@ float square (float x) {
 // as required by the specification. fast(?) implementation from stb.h
 // @OPTIMIZE: called multiple times per-packet with "constants"; move to setup
 immutable byte[16] log2_4 = [0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4];
-private int ilog (int n) {
+int ilog (int n) {
   //static if (__VERSION__ > 2067) pragma(inline, true);
   if (n < 0) return 0; // signed n returns 0
   // 2 compares if n < 16, 3 compares otherwise (4 if signed or n > 1<<29)
@@ -841,7 +853,7 @@ void compute_accelerated_huffman (Codebook* c) {
   c.fast_huffman.ptr[0..FAST_HUFFMAN_TABLE_SIZE] = -1;
   auto len = (c.sparse ? c.sorted_entries : c.entries);
   version(STB_VORBIS_FAST_HUFFMAN_SHORT) {
-    if (len > 32767) len = 32767; // largest possible value we can encode!
+    if (len > 32_767) len = 32_767; // largest possible value we can encode!
   }
   foreach (uint i; 0..len) {
     if (c.codeword_lengths[i] <= STB_VORBIS_FAST_HUFFMAN_LENGTH) {
@@ -877,10 +889,12 @@ void compute_sorted_huffman (Codebook* c, ubyte* lengths, uint* values) {
   // but it's like 4 extra lines of code, so.
   if (!c.sparse) {
     int k = 0;
-    foreach (uint i; 0..c.entries) if (include_in_sort(c, lengths[i])) c.sorted_codewords[k++] = bit_reverse(c.codewords[i]);
+    foreach (uint i; 0..c.entries)
+        if (include_in_sort(c, lengths[i])) c.sorted_codewords[k++] = bit_reverse(c.codewords[i]);
     assert(k == c.sorted_entries);
   } else {
-    foreach (uint i; 0..c.sorted_entries) c.sorted_codewords[i] = bit_reverse(c.codewords[i]);
+        foreach (uint i; 0..c.sorted_entries)
+            c.sorted_codewords[i] = bit_reverse(c.codewords[i]);
   }
 
   qsort(c.sorted_codewords, c.sorted_entries, (c.sorted_codewords[0]).sizeof, &uint32_compare);
@@ -984,7 +998,7 @@ int init_blocksize (VorbisDecoder f, int b, int n) {
 
 void neighbors (ushort* x, int n, ushort* plow, ushort* phigh) {
   int low = -1;
-  int high = 65536;
+  int high = 65_536;
   assert(n >= 0 && n <= ushort.max);
   foreach (ushort i; 0..cast(ushort)n) {
     if (x[i] > low  && x[i] < x[n]) { *plow = i; low = x[i]; }
