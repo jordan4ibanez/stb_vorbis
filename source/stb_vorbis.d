@@ -1471,7 +1471,14 @@ int codebook_decode_step (ref VorbisDecoder f, Codebook* c, float* output, int l
   return true;
 }
 
-int codebook_decode_deinterleave_repeat (ref VorbisDecoder f, Codebook* c, ref float*[STB_VORBIS_MAX_CHANNELS] outputs, int ch, int* c_inter_p, int* p_inter_p, int len, int total_decode) {
+int codebook_decode_deinterleave_repeat (
+ref VorbisDecoder f, 
+Codebook* c, 
+ref float*[STB_VORBIS_MAX_CHANNELS] outputs, 
+int ch, int* c_inter_p, 
+int* p_inter_p, int len, 
+int total_decode) {
+  
   int c_inter = *c_inter_p;
   int p_inter = *p_inter_p;
   int z, effective = c.dimensions;
@@ -1708,7 +1715,14 @@ int residue_decode (ref VorbisDecoder f, Codebook* book, float* target, int offs
   return true;
 }
 
-void decode_residue (ref VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] residue_buffers, int ch, int n, int rn, ubyte* do_not_decode) {
+void decode_residue (
+ref VorbisDecoder f,
+ref float*[STB_VORBIS_MAX_CHANNELS] residue_buffers,
+int ch,
+int n,
+int rn,
+ubyte* do_not_decode) {
+  
   import core.stdc.stdlib : alloca;
   import core.stdc.string : memset;
 
@@ -1722,7 +1736,8 @@ void decode_residue (ref VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] re
   version(STB_VORBIS_DIVIDES_IN_RESIDUE) {
     int** classifications = cast(int**)mixin(temp_block_array!("f.vrchannels", "part_read*int.sizeof"));
   } else {
-    ubyte*** part_classdata = cast(ubyte***)mixin(temp_block_array!("f.vrchannels", "part_read*cast(int)(ubyte*).sizeof"));
+    ubyte*** part_classdata =
+        cast(ubyte***)mixin(temp_block_array!("f.vrchannels", "part_read*cast(int)(ubyte*).sizeof"));
   }
 
   //stb_prof(2);
@@ -1768,11 +1783,15 @@ void decode_residue (ref VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] re
               Codebook* book = f.codebooks+b;
               //stb_prof(20); // accounts for X time
               version(STB_VORBIS_DIVIDES_IN_CODEBOOK) {
-                if (!codebook_decode_deinterleave_repeat(f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)) goto done;
+                if (!codebook_decode_deinterleave_repeat(
+                    f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)
+                    )goto done;
               } else {
                 // saves 1%
                 //if (!codebook_decode_deinterleave_repeat_2(f, book, residue_buffers, &c_inter, &p_inter, n, r.part_size)) goto done; // according to C source
-                if (!codebook_decode_deinterleave_repeat(f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)) goto done;
+                if (!codebook_decode_deinterleave_repeat(
+                    f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)
+                    ) goto done;
               }
               //stb_prof(7);
             } else {
@@ -1815,7 +1834,9 @@ void decode_residue (ref VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] re
             if (b >= 0) {
               Codebook* book = f.codebooks+b;
               //stb_prof(22);
-              if (!codebook_decode_deinterleave_repeat(f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)) goto done;
+              if (!codebook_decode_deinterleave_repeat(
+                    f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)
+                  ) goto done;
               //stb_prof(3);
             } else {
               zz += r.part_size;
@@ -1856,7 +1877,9 @@ void decode_residue (ref VorbisDecoder f, ref float*[STB_VORBIS_MAX_CHANNELS] re
             if (b >= 0) {
               Codebook* book = f.codebooks+b;
               //stb_prof(22);
-              if (!codebook_decode_deinterleave_repeat(f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)) goto done;
+              if (!codebook_decode_deinterleave_repeat(
+                   f, book, residue_buffers, ch, &c_inter, &p_inter, n, r.part_size)
+                  ) goto done;
               //stb_prof(3);
             } else {
               zz += r.part_size;
