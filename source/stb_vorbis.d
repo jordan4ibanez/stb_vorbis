@@ -4635,12 +4635,16 @@ public:
         return 1; // the next frame will contain the sample
       } else if (this.current_loc+frame_samples+max_frame_samples > sample_number) {
         // there's a chance the frame after this could contain the sample
-        vorbis_pump_first_frame(this);
+        // This is put here to turn off IDE warnings
+        uint discardConsumer;
+        discardConsumer = vorbis_pump_first_frame(this);
       } else {
         // this frame is too early to be relevant
         this.current_loc += frame_samples;
         this.previous_length = 0;
-        maybe_start_packet(this);
+        // This is put here to turn off IDE warnings
+        uint discardConsumer;
+        discardConsumer = maybe_start_packet(this);
         flush_packet(this);
       }
     }
