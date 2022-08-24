@@ -4010,12 +4010,21 @@ void compute_stereo_samples (short* output, int num_c, float** data, int d_offse
   }
 }
 
-void convert_samples_short (int buf_c, short** buffer, int b_offset, int data_c, float** data, int d_offset, int samples) {
+void convert_samples_short (
+int buf_c,
+short** buffer,
+int b_offset,
+int data_c,
+float** data,
+int d_offset,
+int samples) {
+  
   import core.stdc.string : memset;
 
   if (buf_c != data_c && buf_c <= 2 && data_c <= 6) {
     immutable int[2][3] channel_selector = [ [0,0], [PLAYBACK_MONO,0], [PLAYBACK_LEFT, PLAYBACK_RIGHT] ];
-    foreach (immutable i; 0..buf_c) compute_samples(channel_selector[buf_c].ptr[i], buffer[i]+b_offset, data_c, data, d_offset, samples);
+    foreach (immutable i; 0..buf_c)
+        compute_samples(channel_selector[buf_c].ptr[i], buffer[i]+b_offset, data_c, data, d_offset, samples);
   } else {
     int limit = (buf_c < data_c ? buf_c : data_c);
     foreach (immutable i; 0..limit) copy_samples(buffer[i]+b_offset, data[i]+d_offset, samples);
