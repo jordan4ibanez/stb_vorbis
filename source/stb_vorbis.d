@@ -1232,9 +1232,7 @@ uint get_bits_main (VorbisDecoder* f, int n) {
     }
     if (f.valid_bits == 0) f.acc = 0;
     while (f.valid_bits < n) {
-        debug { import core.stdc.stdio : printf; printf("HERE WE ARE\n"); }
       z = get8_packet_raw(f);
-      debug { import core.stdc.stdio : printf; printf("HERE WE ARE 2\n"); }
       if (z == EOP) {
         f.valid_bits = INVALID_BITS;
         return 0;
@@ -2958,7 +2956,6 @@ int is_whole_packet_present (VorbisDecoder* f, int end_page) {
 
 int start_decoder (VorbisDecoder* f) {
   import core.stdc.string : memcpy, memset;
-    debug { import core.stdc.stdio : printf; printf("new\n"); }
   ubyte[6] header;
   ubyte x, y;
   int len, max_submaps = 0;
@@ -3071,8 +3068,6 @@ int start_decoder (VorbisDecoder* f) {
   // third packet!
   if (!start_packet(f)) return false;
 
-  debug { import core.stdc.stdio : printf; printf("1\n"); }
-
   /+if (f.push_mode) {
     if (!is_whole_packet_present(f, true)) {
       // convert error in ogg header to write type
@@ -3085,8 +3080,6 @@ int start_decoder (VorbisDecoder* f) {
   foreach (immutable i; 0..6) header[i] = cast(ubyte)get8_packet(f); //k8
   if (!vorbis_validate(header.ptr)) return error(f, STBVorbisError.invalid_setup);
 
-
-    debug { import core.stdc.stdio : printf; printf("2\n"); }
   // codebooks
   f.codebook_count = get_bits!8(f)+1;
   f.codebooks = setup_malloc!Codebook(f, f.codebook_count);
@@ -3094,22 +3087,14 @@ int start_decoder (VorbisDecoder* f) {
   if (f.codebooks is null) return error(f, STBVorbisError.outofmem);
   memset(f.codebooks, 0, (*f.codebooks).sizeof*f.codebook_count);
 
-  debug { import core.stdc.stdio : printf; printf("3\n"); }
-
-  // Error is here
   foreach (immutable i; 0..f.codebook_count) {
 
-    debug { import core.stdc.stdio : printf; printf("4\n"); }
     uint* values;
     int ordered, sorted_count;
     int total = 0;
     ubyte* lengths;
     Codebook* c = f.codebooks+i;
-
-    debug { import core.stdc.stdio : printf; printf("5 N\n"); }
-    // ERROR IS RIGHT HERE
     x = get_bits!8(f);
-    debug { import core.stdc.stdio : printf; printf("6 N\n"); }
     if (x != 0x42)
         return error(f, STBVorbisError.invalid_setup);
     
@@ -4324,9 +4309,7 @@ public:
 
   void open (FILE *fl, bool doclose=true) {
     import core.stdc.stdio : ftell, fseek, SEEK_SET, SEEK_END;
-    debug { import core.stdc.stdio : printf; printf("1\n"); }
     close();
-    debug { import core.stdc.stdio : printf; printf("2\n"); }
     if (fl is null) { error = STBVorbisError.invalid_stream; return; }
     stclose = doclose;
     stst = stpos = cast(uint)ftell(fl);
@@ -4336,14 +4319,11 @@ public:
     stclose = false;
     stfl = fl;
     import std.functional : toDelegate;
-    debug { import core.stdc.stdio : printf; printf("3\n"); }
     stmread = toDelegate(&stflRead);
     isOpened = true;
     eof = false;
     read_comments = true;
-    debug { import core.stdc.stdio : printf; printf("4\n"); }
     if (start_decoder(&this)) {
-    debug { import core.stdc.stdio : printf; printf("5\n"); }
       vorbis_pump_first_frame(&this);
       return;
     }
