@@ -3948,7 +3948,7 @@ void copy_samples (short* dest, float* src, int len) {
   mixin(declfcvar!"temp");
   foreach (immutable _; 0..len) {
     mixin(FAST_SCALED_FLOAT_TO_INT!("*src", "15"));
-    if (cast(uint)(v+32768) > 65535) v = (v < 0 ? -32768 : 32767);
+    if (cast(uint)(v+32_768) > 65_535) v = (v < 0 ? -32_768 : 32_767);
     *dest++ = cast(short)v; //k8
     ++src;
   }
@@ -3969,7 +3969,7 @@ void compute_samples (int mask, short* output, int num_c, float** data, int d_of
     }
     foreach (immutable i; 0..n) {
       mixin(FAST_SCALED_FLOAT_TO_INT!("buffer[i]", "15"));
-      if (cast(uint)(v+32768) > 65535) v = (v < 0 ? -32768 : 32767);
+      if (cast(uint)(v+32_768) > 65_535) v = (v < 0 ? -32_768 : 32_767);
       output[o+i] = cast(short)v; //k8
     }
   }
@@ -4004,7 +4004,7 @@ void compute_stereo_samples (short* output, int num_c, float** data, int d_offse
     }
     foreach (immutable i; 0..n<<1) {
       mixin(FAST_SCALED_FLOAT_TO_INT!("buffer[i]", "15"));
-      if (cast(uint)(v+32768) > 65535) v = (v < 0 ? -32768 : 32767);
+      if (cast(uint)(v+32_768) > 65_535) v = (v < 0 ? -32_768 : 32_767);
       output[o2+i] = cast(short)v; //k8
     }
   }
