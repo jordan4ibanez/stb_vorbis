@@ -4296,6 +4296,10 @@ public:
     return !isOpened;
   }
 
+  @property bool opened () {
+    return isOpened;
+  }
+
   void open (FILE *fl, bool doclose=true) {
     import core.stdc.stdio : ftell, fseek, SEEK_SET, SEEK_END;
     close();
