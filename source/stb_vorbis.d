@@ -3155,7 +3155,8 @@ int start_decoder (ref VorbisDecoder f) {
     } else {
       sorted_count = 0;
       version(STB_VORBIS_NO_HUFFMAN_BINARY_SEARCH) {} else {
-        foreach (immutable j; 0..c.entries) if (lengths[j] > STB_VORBIS_FAST_HUFFMAN_LENGTH && lengths[j] != NO_CODE) ++sorted_count;
+        foreach (immutable j; 0..c.entries)
+            if (lengths[j] > STB_VORBIS_FAST_HUFFMAN_LENGTH && lengths[j] != NO_CODE) ++sorted_count;
       }
     }
 
@@ -3223,7 +3224,9 @@ int start_decoder (ref VorbisDecoder f) {
       if (mults is null) return error(f, STBVorbisError.outofmem);
       foreach (immutable j; 0..cast(int)c.lookup_values) {
         int q = get_bits_main(f, c.value_bits);
-        if (q == EOP) { setup_temp_free(f, mults, cast(int)(mults[0]).sizeof*c.lookup_values); return error(f, STBVorbisError.invalid_setup); }
+        if (q == EOP) { setup_temp_free(f, mults, cast(int)(mults[0]).sizeof*c.lookup_values);
+            return error(f, STBVorbisError.invalid_setup);
+        }
         mults[j] = cast(ushort)q; //k8
       }
 
@@ -3238,7 +3241,10 @@ int start_decoder (ref VorbisDecoder f) {
           } else {
             c.multiplicands = setup_malloc!codetype(f, c.entries*c.dimensions);
           }
-          if (c.multiplicands is null) { setup_temp_free(f, mults, cast(int)(mults[0]).sizeof*c.lookup_values); return error(f, STBVorbisError.outofmem); }
+          if (c.multiplicands is null) {
+            setup_temp_free(f, mults, cast(int)(mults[0]).sizeof*c.lookup_values);
+            return error(f, STBVorbisError.outofmem);
+          }
           foreach (immutable j; 0..(sparse ? c.sorted_entries : c.entries)) {
             uint z = (sparse ? c.sorted_values[j] : j);
             uint div = 1;
@@ -3265,7 +3271,10 @@ int start_decoder (ref VorbisDecoder f) {
       {
         float last = 0;
         c.multiplicands = setup_malloc!codetype(f, c.lookup_values);
-        if (c.multiplicands is null) { setup_temp_free(f, mults, cast(uint)(mults[0]).sizeof*c.lookup_values); return error(f, STBVorbisError.outofmem); }
+        if (c.multiplicands is null) {
+            setup_temp_free(f, mults, cast(uint)(mults[0]).sizeof*c.lookup_values);
+            return error(f, STBVorbisError.outofmem);
+        }
         foreach (immutable j; 0..cast(int)c.lookup_values) {
           float val = mults[j]*c.delta_value+c.minimum_value+last;
           c.multiplicands[j] = val;
@@ -3477,7 +3486,8 @@ int start_decoder (ref VorbisDecoder f) {
     f.channel_buffers.ptr[i] = setup_malloc!float(f, f.blocksize_1);
     f.previous_window.ptr[i] = setup_malloc!float(f, f.blocksize_1/2);
     f.finalY.ptr[i]          = setup_malloc!short(f, longest_floorlist);
-    if (f.channel_buffers.ptr[i] is null || f.previous_window.ptr[i] is null || f.finalY.ptr[i] is null) return error(f, STBVorbisError.outofmem);
+    if (f.channel_buffers.ptr[i] is null || f.previous_window.ptr[i] is null || f.finalY.ptr[i] is null)
+        return error(f, STBVorbisError.outofmem);
     version(STB_VORBIS_NO_DEFER_FLOOR) {
       f.floor_buffers.ptr[i] = setup_malloc!float(f, f.blocksize_1/2);
       if (f.floor_buffers.ptr[i] is null) return error(f, STBVorbisError.outofmem);
@@ -3491,7 +3501,9 @@ int start_decoder (ref VorbisDecoder f) {
 
   version(STB_VORBIS_DIVIDE_TABLE) {
     if (integer_divide_table[1].ptr[1] == 0) {
-      foreach (immutable i; 0..DIVTAB_NUMER) foreach (immutable j; 1..DIVTAB_DENOM) integer_divide_table[i].ptr[j] = i/j;
+      foreach (immutable i; 0..DIVTAB_NUMER)
+        foreach (immutable j; 1..DIVTAB_DENOM)
+            integer_divide_table[i].ptr[j] = i/j;
     }
   }
 
