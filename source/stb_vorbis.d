@@ -534,7 +534,7 @@ struct Floor1 {
   ubyte[16] class_subclasses; // varies
   ubyte[16] class_masterbooks; // varies
   short[8][16] subclass_books; // varies
-  ushort[31*8+2] XList; // varies
+  ushort[31*8+2] xList; // varies
   ubyte[31*8+2] sorted_order;
   ubyte[2][31*8+2] neighbors;
   ubyte floor1_multiplier;
@@ -2437,7 +2437,7 @@ int do_floor (VorbisDecoder f, Mapping* map, int i, int n, float* target, YTYPE*
       }
       if (cond) {
         int hy = finalY[j]*g.floor1_multiplier;
-        int hx = g.XList.ptr[j];
+        int hx = g.xList.ptr[j];
         if (lx != hx) { mixin(draw_line!("target", "lx", "ly", "hx", "hy", "n2")); }
         lx = hx; ly = hy;
       }
@@ -2575,9 +2575,9 @@ int vorbis_decode_packet_rest (VorbisDecoder f, int* len, Mode* m, int left_star
         foreach (immutable j; 2..g.values) {
           int low = g.neighbors.ptr[j].ptr[0];
           int high = g.neighbors.ptr[j].ptr[1];
-          //neighbors(g.XList, j, &low, &high);
+          //neighbors(g.xList, j, &low, &high);
           int pred = void;
-          mixin(predict_point!("pred", "g.XList.ptr[j]", "g.XList.ptr[low]", "g.XList.ptr[high]", "finalY[low]", "finalY[high]"));
+          mixin(predict_point!("pred", "g.xList.ptr[j]", "g.xList.ptr[low]", "g.xList.ptr[high]", "finalY[low]", "finalY[high]"));
           int val = finalY[j];
           int highroom = range-pred;
           int lowroom = pred;
@@ -3250,20 +3250,20 @@ int start_decoder (VorbisDecoder f) {
       }
       g.floor1_multiplier = get_bits_add_no!2(f, 1);
       g.rangebits = get_bits!4(f);
-      g.XList[0] = 0;
-      g.XList[1] = cast(ushort)(1<<g.rangebits); //k8
+      g.xList[0] = 0;
+      g.xList[1] = cast(ushort)(1<<g.rangebits); //k8
       g.values = 2;
       foreach (immutable j; 0..g.partitions) {
         int c = g.partition_class_list[j];
         foreach (immutable k; 0..g.class_dimensions[c]) {
-          g.XList[g.values] = cast(ushort)get_bits_main(f, g.rangebits); //k8
+          g.xList[g.values] = cast(ushort)get_bits_main(f, g.rangebits); //k8
           ++g.values;
         }
       }
       assert(g.values <= ushort.max);
       // precompute the sorting
       foreach (ushort j; 0..cast(ushort)g.values) {
-        p[j].x = g.XList[j];
+        p[j].x = g.xList[j];
         p[j].y = j;
       }
       qsort(p.ptr, g.values, (p[0]).sizeof, &point_compare);
@@ -3271,7 +3271,7 @@ int start_decoder (VorbisDecoder f) {
       // precompute the neighbors
       foreach (uint j; 2..g.values) {
         ushort low = void, hi = void;
-        neighbors(g.XList.ptr, j, &low, &hi);
+        neighbors(g.xList.ptr, j, &low, &hi);
         assert(low <= ubyte.max);
         assert(hi <= ubyte.max);
         g.neighbors[j].ptr[0] = cast(ubyte)low;
