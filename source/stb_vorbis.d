@@ -4160,8 +4160,9 @@ private:
   }
 
 public:
-  this () {}
-  ~this () { close(); }
+  ~this () {
+    close();
+   }
 
   this (int asize, readCB rcb) {
   	assert(rcb !is null);
