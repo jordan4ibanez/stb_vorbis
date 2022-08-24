@@ -2511,7 +2511,14 @@ int do_floor (ref VorbisDecoder f, Mapping* map, int i, int n, float* target, YT
 //        has to be the same as frame N+1's left_end-left_start (which they are by
 //        construction)
 
-int vorbis_decode_initial (ref VorbisDecoder f, int* p_left_start, int* p_left_end, int* p_right_start, int* p_right_end, int* mode) {
+int vorbis_decode_initial (
+ref VorbisDecoder f,
+int* p_left_start,
+int* p_left_end,
+int* p_right_start,
+int* p_right_end,
+int* mode) {
+  
   Mode *m;
   int i, n, prev, next, window_center;
   f.channel_buffer_start = f.channel_buffer_end = 0;
@@ -2561,7 +2568,15 @@ int vorbis_decode_initial (ref VorbisDecoder f, int* p_left_start, int* p_left_e
   return true;
 }
 
-int vorbis_decode_packet_rest (ref VorbisDecoder f, int* len, Mode* m, int left_start, int left_end, int right_start, int right_end, int* p_left) {
+int vorbis_decode_packet_rest (
+ref VorbisDecoder f,
+int* len,
+Mode* m,
+int left_start,
+int left_end,
+int right_start,
+int right_end,
+int* p_left) {
   import core.stdc.string : memcpy, memset;
 
   Mapping* map;
@@ -2644,6 +2659,7 @@ int vorbis_decode_packet_rest (ref VorbisDecoder f, int* len, Mode* m, int left_
         }
 
         version(STB_VORBIS_NO_DEFER_FLOOR) {
+            
           do_floor(f, map, i, n, f.floor_buffers.ptr[i], finalY, step2_flag);
         } else {
           // defer final floor computation until _after_ residue
