@@ -3696,11 +3696,14 @@ int get_seek_page_info (ref VorbisDecoder f, ProbedPage* z) {
 
   // record where the page starts
   z.page_start = f.fileOffset;
+  
+  // This is put here to turn off IDE warnings
+  uint discardConsumer;
 
   // parse the header
-  getn(f, header.ptr, 27);
+  discardConsumer = getn(f, header.ptr, 27);
   if (header[0] != 'O' || header[1] != 'g' || header[2] != 'g' || header[3] != 'S') return 0;
-  getn(f, lacing.ptr, header[26]);
+  discardConsumer = getn(f, lacing.ptr, header[26]);
 
   // determine the length of the payload
   uint len = 0;
