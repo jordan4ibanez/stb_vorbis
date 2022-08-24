@@ -4691,8 +4691,8 @@ public:
 
       // now we want to seek back 64K from the end (the last page must
       // be at most a little less than 64K, but let's allow a little slop)
-      if (this.stream_len >= 65536 && this.stream_len-65536 >= this.first_audio_page_offset) {
-        previous_safe = this.stream_len-65536;
+      if (this.stream_len >= 65_536 && this.stream_len-65_536 >= this.first_audio_page_offset) {
+        previous_safe = this.stream_len-65_536;
       } else {
         previous_safe = this.first_audio_page_offset;
       }
