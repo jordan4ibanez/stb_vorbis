@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/stb_vorbis
+stb_vorbis.so
+stb_vorbis.dylib
+stb_vorbis.dll
+stb_vorbis.a
+stb_vorbis.lib
+stb_vorbis-test-*
+*.exe
+*.o
+*.obj
+*.lst

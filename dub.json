@@ -1,0 +1,11 @@
+{
+	"authors": [
+        "nothings",
+        "Adam D. Ruppe",
+		"jordan4ibanez"
+	],
+	"copyright": "Copyright © 2022, nothings/Adam D. Ruppe/jordan4ibanez",
+	"description": "stb_vorbis : STB ogg vorbis decoder for game development",
+	"license": "MIT/Public Domain",
+	"name": "stb_vorbis"
+}
