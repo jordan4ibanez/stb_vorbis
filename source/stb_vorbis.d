@@ -2746,7 +2746,9 @@ int* p_left) {
       if (really_zero_channel[i]) {
         memset(f.channel_buffers.ptr[i], 0, (*f.channel_buffers.ptr[i]).sizeof*n2);
       } else {
-        do_floor(f, map, i, n, f.channel_buffers.ptr[i], f.finalY.ptr[i], null);
+        // This is put here to turn off IDE warnings
+        uint discardConsumer;
+        discardConsumer = do_floor(f, map, i, n, f.channel_buffers.ptr[i], f.finalY.ptr[i], null);
       }
     }
   }
@@ -2885,7 +2887,9 @@ int vorbis_finish_frame (ref VorbisDecoder f, int len, int left, int right) {
 bool vorbis_pump_first_frame (ref VorbisDecoder f) {
   int len, right, left;
   if (vorbis_decode_packet(f, &len, &left, &right)) {
-    vorbis_finish_frame(f, len, left, right);
+    // This is put here to turn off IDE warnings
+    uint discardConsumer;
+    discardConsumer = vorbis_finish_frame(f, len, left, right);
     return true;
   }
   return false;
@@ -3018,7 +3022,10 @@ int start_decoder (ref VorbisDecoder f) {
     uint vidsize = get32_packet(f);
     //{ import core.stdc.stdio; printf("vendor size: %u\n", vidsize); }
     if (vidsize == EOP) return error(f, STBVorbisError.invalid_setup);
-    while (vidsize--) get8_packet(f);
+    // This is put here to turn off IDE warnings
+    uint discardConsumer;
+    while (vidsize--)
+        discardConsumer = get8_packet(f);
 
     // read comments section
     uint cmtcount = get32_packet(f);
