@@ -4662,7 +4662,7 @@ public:
     return 1;
   }
 
-  public bool seekStart () {
+  bool seekStart () {
     /+if (push_mode) { .error(this, STBVorbisError.invalid_api_mixing); return; }+/
     set_file_offset(this, first_audio_page_offset);
     previous_length = 0;
@@ -4671,7 +4671,7 @@ public:
     return vorbis_pump_first_frame(this);
   }
 
-  public uint streamLengthInSamples () {
+  uint streamLengthInSamples () {
     uint restore_offset, previous_safe;
     uint end, last_page_loc;
 
@@ -4744,11 +4744,11 @@ public:
     return (this.total_samples == SAMPLE_unknown ? 0 : this.total_samples);
   }
 
-  public float streamLengthInSeconds () {
+  float streamLengthInSeconds () {
     return (isOpened ? streamLengthInSamples()/cast(float)sample_rate : 0.0f);
   }
 
-  public int getFrameFloat (int* channels, float*** output) {
+  int getFrameFloat (int* channels, float*** output) {
     int len, right, left;
     /+if (push_mode) return .error(this, STBVorbisError.invalid_api_mixing);+/
 
