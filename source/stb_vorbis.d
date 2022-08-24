@@ -4845,7 +4845,8 @@ public:
   }
 
   int getSamplesShort (int channels, short** buffer, int len) {
-    float** outputs;
+    // Renamed this from outputs to scopeOutputs to stop override of outer scope's variable
+    float** scopeOutputs;
     int n = 0;
     int z = this.vrchannels;
     if (z > channels) z = channels;
@@ -4856,7 +4857,7 @@ public:
       n += k;
       channel_buffer_start += k;
       if (n == len) break;
-      if (!getFrameFloat(null, &outputs)) break;
+      if (!getFrameFloat(null, &scopeOutputs)) break;
     }
     return n;
   }
