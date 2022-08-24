@@ -3725,8 +3725,8 @@ int go_to_page_before (ref VorbisDecoder f, uint limit_offset) {
   uint previous_safe, end;
 
   // now we want to seek back 64K from the limit
-  if (limit_offset >= 65536 && limit_offset-65536 >= f.first_audio_page_offset) {
-    previous_safe = limit_offset-65536;
+  if (limit_offset >= 65_536 && limit_offset-65_536 >= f.first_audio_page_offset) {
+    previous_safe = limit_offset-65_536;
   } else {
     previous_safe = f.first_audio_page_offset;
   }
@@ -3783,7 +3783,7 @@ int seek_to_sample_coarse (ref VorbisDecoder f, uint sample_number) {
     debug(stb_vorbis) assert(left.page_end < right.page_start);
     // search range in bytes
     delta = right.page_start-left.page_end;
-    if (delta <= 65536) {
+    if (delta <= 65_536) {
       // there's only 64K left to search - handle it linearly
       set_file_offset(f, left.page_end);
     } else {
@@ -3803,13 +3803,13 @@ int seek_to_sample_coarse (ref VorbisDecoder f, uint sample_number) {
 
         // ensure the offset is valid
         if (offset < left.page_end) offset = left.page_end;
-        if (offset > right.page_start-65536) offset = right.page_start-65536;
+        if (offset > right.page_start-65_536) offset = right.page_start-65_536;
 
         set_file_offset(f, cast(uint)offset);
       } else {
         // binary search for large ranges (offset by 32K to ensure
         // we don't hit the right page)
-        set_file_offset(f, left.page_end+(delta/2)-32768);
+        set_file_offset(f, left.page_end+(delta/2)-32_768);
       }
 
       if (!vorbis_find_page(f, null, null)) goto error;
