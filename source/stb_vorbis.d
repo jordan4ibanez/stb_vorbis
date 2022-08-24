@@ -4199,7 +4199,7 @@ private:
   // functions to get comment data
   uint comment_data_pos;
 
-
+public:
   int rawRead (void[] buf) {
     static if (__VERSION__ > 2067) pragma(inline, true);
     if (isOpened && buf.length > 0 && stpos < stend) {
@@ -5052,7 +5052,6 @@ private: // k8: 'cause i'm evil
 
 
 // ////////////////////////////////////////////////////////////////////////// //
-private:
 // cool helper to translate C defines
 template cmacroFixVars(T...) {
   /**
@@ -5158,7 +5157,8 @@ template cmacroFixVars(T...) {
       assert(s[pos] == '$' && s[pos+1] == '{');
       pos += 2;
       bool found = false;
-      if (s.length-pos >= tmpPfxName.length+1 && s[pos+tmpPfxName.length] == '}' && s[pos..pos+tmpPfxName.length] == tmpPfxName) {
+      if (s.length-pos >= tmpPfxName.length+1 && s[pos+tmpPfxName.length] == '}' 
+            && s[pos..pos+tmpPfxName.length] == tmpPfxName) {
         if (tmppfx.length == 0) {
           // generate temporary prefix
           auto hash = hashOf(s.ptr, s.length);
