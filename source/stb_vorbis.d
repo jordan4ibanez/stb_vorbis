@@ -2982,9 +2982,11 @@ int start_decoder (ref VorbisDecoder f) {
   f.vrchannels = get8(f); if (!f.vrchannels) return error(f, STBVorbisError.invalid_first_page);
   if (f.vrchannels > STB_VORBIS_MAX_CHANNELS) return error(f, STBVorbisError.too_many_channels);
   f.sample_rate = get32(f); if (!f.sample_rate) return error(f, STBVorbisError.invalid_first_page);
-  get32(f); // bitrate_maximum
-  get32(f); // bitrate_nominal
-  get32(f); // bitrate_minimum
+  // This is put here to turn off IDE warnings
+  uint discardConsumer;
+  discardConsumer = get32(f); // bitrate_maximum
+  discardConsumer = get32(f); // bitrate_nominal
+  discardConsumer = get32(f); // bitrate_minimum
   x = get8(f);
   {
     int log0 = x&15;
@@ -3023,7 +3025,6 @@ int start_decoder (ref VorbisDecoder f) {
     //{ import core.stdc.stdio; printf("vendor size: %u\n", vidsize); }
     if (vidsize == EOP) return error(f, STBVorbisError.invalid_setup);
     // This is put here to turn off IDE warnings
-    uint discardConsumer;
     while (vidsize--)
         discardConsumer = get8_packet(f);
 
@@ -3031,7 +3032,7 @@ int start_decoder (ref VorbisDecoder f) {
     uint cmtcount = get32_packet(f);
     if (cmtcount == EOP) return error(f, STBVorbisError.invalid_setup);
     if (cmtcount > 0) {
-      uint cmtsize = 32768; // this should be enough for everyone
+      uint cmtsize = 32_768; // this should be enough for everyone
       f.comment_data = setup_malloc!ubyte(f, cmtsize);
       if (f.comment_data is null) return error(f, STBVorbisError.outofmem);
       auto cmtpos = 0;
