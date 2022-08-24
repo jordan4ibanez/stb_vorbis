@@ -1,4 +1,4 @@
-module vorbis;
+module stb_vorbis;
 
 // Ogg Vorbis audio decoder - v1.10 - public domain
 // http://nothings.org/stb_vorbis/
@@ -60,7 +60,6 @@ module vorbis;
 /++
 	Port of stb_vorbis to D. Provides .ogg audio file reading capabilities. See [arsd.simpleaudio] for code that can use this to actually load and play the file.
 +/
-module arsd.vorbis;
 
 import core.stdc.stdio : FILE;
 
